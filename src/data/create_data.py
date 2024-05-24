@@ -34,8 +34,33 @@ documents = [
         "smart_connects": ["sales1"]
     },
     {
+        "id": "sales_doc4",
+        "text": "Which products are selling the most",
+        "metadata": {"type": "sales"},
+        "smart_connects": ["sales1"]
+    },
+    {
+        "id": "sales_doc5",
+        "text": "What is the total revenue for the last quarter",
+        "metadata": {"type": "sales"},
+        "smart_connects": ["sales1"]
+    },
+
+    {
         "id": "feedback_doc1",
-        "text": "Review customer feedback from January",
+        "text": "how many customers are satisfied with the product",
+        "metadata": {"type": "feedback"},
+        "smart_connects": ["feedback1"]
+    },
+    {
+        "id": "feedback_doc2",
+        "text": "what customers are saying about the product",
+        "metadata": {"type": "feedback"},
+        "smart_connects": ["feedback1"]
+    },
+    {
+        "id": "feedback_doc3",
+        "text": "Review customer feedback from March",
         "metadata": {"type": "feedback"},
         "smart_connects": ["feedback1"]
     }

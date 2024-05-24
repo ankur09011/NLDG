@@ -82,7 +82,6 @@ def local_callback(state) -> None:
     temp.loc[len(temp)] = scores
     state.dataframe = temp
     state.GLOBAL_QUERY = state.text
-    state.show_dialog = True
 
     # process smart bridge
     r = smart_bridge.run_pipeline_for_query(state.text)
@@ -90,6 +89,8 @@ def local_callback(state) -> None:
     result_df = r['result_df']
     state.dataframe = result_df
     state.refresh('dataframe')
+    state.show_dialog = True
+
 
 
 
