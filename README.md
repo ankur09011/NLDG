@@ -7,6 +7,9 @@ The idea for creating a smart module for automatic analytics dashboard generatio
 ## Note: This project is a work in progress. The code snippets and explanations are based on the initial design and implementation. The final version may differ significantly.
 ### Goal
 
+DEMO VIDEO: 
+[24.05.2024 23_40.webm](docs%2F24.05.2024%2023_40.webm)
+
 To develop a system that:
 - Understands user queries.
 - Identifies relevant data models.
