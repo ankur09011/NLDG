@@ -4,12 +4,14 @@ from transformers import AutoTokenizer
 from transformers import AutoModelForSequenceClassification
 from scipy.special import softmax
 
+from pprint import pprint
 import numpy as np
 import pandas as pd
 from taipy.gui import Gui, notify, builder as tgb
 from constants.generic_constants import PAGE_1 as page
 from data_models.sales_model import SalesDataModel, Product, Customer, SalesTransaction
 
+from data_models.smart_connects import smart_bridge
 import chromadb
 
 
@@ -73,22 +75,23 @@ def local_callback(state) -> None:
     Args:
         - state: state of the Taipy App
     """
+    print("--------local_callback--------")
     notify(state, "Info", f"The text is: {state.text}", True)
     temp = state.dataframe.copy()
     scores = analyze_text(state.text)
     temp.loc[len(temp)] = scores
     state.dataframe = temp
     state.GLOBAL_QUERY = state.text
-    state.text = ""
     state.show_dialog = True
 
-    # for the smart connect getting query
+    # process smart bridge
+    r = smart_bridge.run_pipeline_for_query(state.text)
+    pprint(r)
+    result_df = r['result_df']
+    state.dataframe = result_df
+    state.refresh('dataframe')
 
-    results = collection.query(
-        query_texts=[state.text],
-        n_results=3  # Adjusted to match the example result structure
-    )
-    print(results)
+
 
 path = ""
 treatment = 0

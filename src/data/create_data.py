@@ -9,7 +9,7 @@ import chromadb
 
 # Initialize ChromaDB client
 client = chromadb.PersistentClient(path="chroma")
-
+client.delete_collection("smart_connect_collection_v2")
 # Create or get the collection
 collection = client.create_collection("smart_connect_collection_v2", get_or_create=True)
 
@@ -17,13 +17,13 @@ collection = client.create_collection("smart_connect_collection_v2", get_or_crea
 documents = [
     {
         "id": "sales_doc0",
-        "text": "Analyze the sales data for the last quarter",
+        "text": "Analyze the sales data for the last quarter using line charts",
         "metadata": {"type": "sales", "chart_type": "line"},
         "smart_connects": ["sales1"]
     },
     {
         "id": "sales_doc2",
-        "text": "Analyze the sales data for the last quarter only in line charts",
+        "text": "Review the sales data for the last quarter only in line charts",
         "metadata": {"type": "sales"},
         "smart_connects": ["sales2"]
     },
