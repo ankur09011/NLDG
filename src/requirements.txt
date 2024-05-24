@@ -1,0 +1,4 @@
+taipy
+PuLP
+pandas
+polars
