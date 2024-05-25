@@ -56,8 +56,10 @@ dataframe2 = dataframe1.copy()
 
 # raw query DF
 raw_query_df = pd.read_csv('data/sample_sales_data.csv')
-
 raw_text = pd.DataFrame(documents)
+sales_df = pd.read_csv('data/sample_sales_data.csv')
+employee_df = pd.read_csv('data/sample_employee_data.csv')
+feedback_df = pd.read_csv('data/sample_feedback_data.csv')
 
 # convert metadata and smart_connects column to string from dict and list
 raw_text['metadata'] = raw_text['metadata'].apply(lambda x: json.dumps(x))
@@ -306,6 +308,8 @@ def show_partial(state):
                 _dynamic_components.append(text_component)
 
             elif chart_type == 'bar_chart':
+                _dynamic_components.append(tgb.text(f"## Bar Chart for {data_point},"
+                                                    f" where x={x_axis}, y={y_axis}", mode='md'))
                 gen_bar_chart_df = pd.DataFrame(_pipeline_results['data_points'][data_point])
                 state.gen_bar_chart_df = gen_bar_chart_df
                 bar_chart = tgb.chart("{gen_bar_chart_df}",
@@ -315,6 +319,8 @@ def show_partial(state):
                 _dynamic_components.append(bar_chart)
 
             elif chart_type == 'line_chart':
+                _dynamic_components.append(tgb.text(f"## Line Chart for {data_point},"
+                                                    f" where x={x_axis}, y={y_axis}", mode='md'))
                 gen_line_chart_df = pd.DataFrame(_pipeline_results['data_points'][data_point])
                 state.gen_line_chart_df = gen_line_chart_df
                 line_chart = tgb.chart("{gen_line_chart_df}",
@@ -324,6 +330,7 @@ def show_partial(state):
                 _dynamic_components.append(line_chart)
 
             elif chart_type == 'table':
+                _dynamic_components.append(tgb.text(f"## Table for {data_point},", mode='md'))
                 gen_table_df = pd.DataFrame(_pipeline_results['data_points'][data_point])
                 state.gen_table_df = gen_table_df
                 table = tgb.table("{gen_table_df}", page_size=50, rebuild=True)
@@ -333,7 +340,6 @@ def show_partial(state):
     _dynamic_page.add(*_dynamic_components)
     new_partial.update_content(state, _dynamic_page)
     state.show_dialog = True
-
 
 
 # test page

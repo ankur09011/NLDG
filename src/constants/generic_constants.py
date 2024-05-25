@@ -45,16 +45,25 @@ PAGE_RAW_DB = """
 
 <|layout|columns=1||>
 <|Raw queries mapping for Semantic Search |expandable||>
-<|{raw_text}|table|width=100%|number_format=%.2f|rebuild|page_size=50||>
+<|{raw_text}|table|width=100%|number_format=%.2f|rebuild|page_size=10||>
 
 <|layout|columns=1||>
 <|Raw sales transaction data |expandable||>
-<|{raw_query_df}|table|width=100%|number_format=%.2f|rebuild|page_size=50||>
+<|{raw_query_df}|table|width=100%|number_format=%.2f|rebuild|page_size=10||>
+
+<|layout|columns=1||>
+<|Raw Employee data |expandable||>
+<|{employee_df}|table|width=100%|number_format=%.2f|rebuild|page_size=10||>
+
+<|layout|columns=1||>
+<|Raw Feedback data |expandable||>
+<|{feedback_df}|table|width=100%|number_format=%.2f|rebuild|page_size=10||>
+
 
 
 <|layout|columns=1||>
 <|Query Results |expandable||>
-<|{dataframe}|table|width=100%|number_format=%.2f|rebuild|page_size=50||>
+<|{dataframe}|table|width=100%|number_format=%.2f|rebuild|page_size=10||>
 
 
 """

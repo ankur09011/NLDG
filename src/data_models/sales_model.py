@@ -234,22 +234,6 @@ class EmployeeDataModel(BaseDataModel):
         }
 
 
-# Example Usage
-employees = [
-    Employee(employee_id=1, name="John Doe", gender="Male", age=30, doj="2020-01-15", attendance_percentage=95.5,
-             incentive=2000, sales=15000),
-    Employee(employee_id=2, name="Jane Smith", gender="Female", age=28, doj="2019-07-23", attendance_percentage=98.2,
-             incentive=2500, sales=20000),
-    # Add more employees as needed
-]
-
-employee_data_model = EmployeeDataModel(employees=employees)
-employee_data_model.preprocess()
-employee_data_model.validate_data()
-employee_data_model.benchmark()
-employee_data_model.calculate_data_points()
-print(employee_data_model.result_data)
-
 # TODO: NOTE: remove below code to make it based on user
 
 # transaction data
