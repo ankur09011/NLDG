@@ -9,13 +9,21 @@ import plotly.graph_objects as go
 import chromadb
 from data.create_data import documents, document_map
 from .base_models import BaseDataModel, BaseDocument
-from .sales_model import SalesDataModel, Product, Customer, SalesTransaction
+from .sales_model import (SalesDataModel,
+                          Product, Customer,
+                          Feedback,
+                          SalesTransaction,
+                          CustomerFeedbackModel)
 
 # Initialize ChromaDB client
 client = chromadb.PersistentClient(path="data/chroma")
 
 # Create or get the collection
 collection = client.create_collection("smart_connect_collection_v2", get_or_create=True)
+
+# transaction data
+df = pd.read_csv('data/sample_sales_data.csv')
+print(df)
 
 
 class BaseSmartConnect(BaseModel):
@@ -28,6 +36,13 @@ class BaseSmartConnect(BaseModel):
 
 class SalesSmartConnect(BaseSmartConnect):
     data_model: SalesDataModel
+    dash_config: Dict[str, Any]
+
+    def get_data_model(self):
+        return self.data_model
+
+class FeedbackSmartConnect(BaseSmartConnect):
+    data_model: CustomerFeedbackModel
     dash_config: Dict[str, Any]
 
     def get_data_model(self):
@@ -50,10 +65,7 @@ dashboard_sales = {
 }
 
 # dynamic page
-df = pd.read_csv('data/sample_sales_data.csv')
-print(df)
 
-# Example usage of SalesDataModel
 sales_data = SalesDataModel(
     products=[
         Product(product_id=1, name="Product A", category="Category 1", price=100.0)
@@ -64,16 +76,31 @@ sales_data = SalesDataModel(
     transactions=[SalesTransaction(**row) for row in df.to_dict(orient='records')]
 )
 
-# Sales data pipeline
-sales_pipeline_results = sales_data.run_pipeline()
-print(sales_pipeline_results)
-print(sales_pipeline_results)
+feedback_data = CustomerFeedbackModel(
+    feedbacks=[
+        Feedback(feedback_id=1, customer_id=1, rating=4.5, comments="Great service", date="2024-05-01"),
+        Feedback(feedback_id=2, customer_id=1, rating=3.5, comments="Good service", date="2024-05-02")
+    ],
+    transactions=[SalesTransaction(**row) for row in df.to_dict(orient='records')]
+)
+
+# # Sales data pipeline
+# sales_pipeline_results = sales_data.run_pipeline()
+# print(sales_pipeline_results)
+# print(sales_pipeline_results)
 
 # Example usage
 sales_smart_connect = SalesSmartConnect(
     id="sales1",
     name="Sales Data Connect",
     data_model=sales_data,
+    dash_config=dashboard_sales
+)
+
+feedback_smart_connect = FeedbackSmartConnect(
+    id="feedback1",
+    name="Feedback Data Connect",
+    data_model=feedback_data,
     dash_config=dashboard_sales
 )
 
@@ -141,7 +168,7 @@ smart_connects = {
     "sales1": sales_smart_connect,
     "sales2": sales_smart_connect,
     # Add other SmartConnect objects here
-    "feedback1": sales_smart_connect
+    "feedback1": feedback_smart_connect
 }
 
 smart_bridge = SmartBridge(smart_connects=smart_connects)
