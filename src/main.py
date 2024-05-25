@@ -1,5 +1,6 @@
 """ Creates a sentiment analysis App using Taipy"""
 import taipy.gui
+import json
 from transformers import AutoTokenizer
 from transformers import AutoModelForSequenceClassification
 from scipy.special import softmax
@@ -8,11 +9,13 @@ from pprint import pprint
 import numpy as np
 import pandas as pd
 from taipy.gui import Gui, notify, builder as tgb
-from constants.generic_constants import PAGE_1 as page
+from constants.generic_constants import PAGE_1 as page, PAGE_RAW_DB
 from data_models.sales_model import SalesDataModel, Product, Customer, SalesTransaction
 
 from data_models.smart_connects import smart_bridge
 import chromadb
+
+from data.create_data import documents, document_map
 
 
 # Initialize ChromaDB client
@@ -43,6 +46,16 @@ dataframe = pd.DataFrame(
 
 dataframe2 = dataframe.copy()
 
+# raw query DF
+raw_query_df = pd.read_csv('data/sample_sales_data.csv')
+
+raw_text = pd.DataFrame(documents)
+
+# convert metadata and smart_connects column to string from dict and list
+raw_text['metadata'] = raw_text['metadata'].apply(lambda x: json.dumps(x))
+raw_text['smart_connects'] = raw_text['smart_connects'].apply(lambda x: json.dumps(x))
+
+print(raw_text)
 
 def analyze_text(input_text: str) -> dict:
     """
@@ -229,7 +242,8 @@ pages = {
     "/": "<|toggle|theme|>\n<center>\n<|navbar|>\n</center>",
     "line": page + dialog_comp,
     "text": page_file,
-    "dynamic": dynamic_page
+    "dynamic": dynamic_page,
+    "raw_data": PAGE_RAW_DB
 }
 
-Gui(pages=pages).run(title="Sentiment Analysis", port=5001, debug=True, use_reloader=True)
+Gui(pages=pages).run(title="NLDG", port=5001, debug=True, use_reloader=True)
