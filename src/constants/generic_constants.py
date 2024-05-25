@@ -13,13 +13,18 @@ PAGE_1 = """
 <|Query Table with matches |expandable||>
 <|{dataframe}|table|width=100%|number_format=%.2f|rebuild||>
 
+
+**last query softmax score**
+<|layout|columns=1||>
+<|{dataframe1}|table|width=100%|number_format=%.2f|rebuild||>
+
 <|layout|columns=1 1 1||>
-## Positive <|{np.mean(dataframe['Score Pos'])}|text|format=%.2f|raw|>
+## Positive <|{np.mean(dataframe1['Score Pos'])}|text|format=%.2f|raw|>
 
-## Neutral <|{np.mean(dataframe['Score Neu'])}|text|format=%.2f|raw|>
+## Neutral <|{np.mean(dataframe1['Score Neu'])}|text|format=%.2f|raw|>
 
-## Negative <|{np.mean(dataframe['Score Neg'])}|text|format=%.2f|raw|>
-|>
+## Negative <|{np.mean(dataframe1['Score Neg'])}|text|format=%.2f|raw|>
+
 
 """
 

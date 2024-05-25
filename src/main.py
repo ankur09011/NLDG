@@ -34,7 +34,9 @@ tokenizer = AutoTokenizer.from_pretrained(MODEL)
 model = AutoModelForSequenceClassification.from_pretrained(MODEL)
 show_dialog = False
 
-dataframe = pd.DataFrame(
+dataframe = pd.DataFrame()
+
+dataframe1 = pd.DataFrame(
     {
         "Text": [""],
         "Score Pos": [0.33],
@@ -44,7 +46,7 @@ dataframe = pd.DataFrame(
     }
 )
 
-dataframe2 = dataframe.copy()
+dataframe2 = dataframe1.copy()
 
 # raw query DF
 raw_query_df = pd.read_csv('data/sample_sales_data.csv')
@@ -89,11 +91,25 @@ def local_callback(state) -> None:
         - state: state of the Taipy App
     """
     print("--------local_callback--------")
+    from taipy.gui.state import State
+    pprint(state)
+    pprint(state.get_gui())
+
+    try:
+        import inspect
+        print(inspect.getmembers(state))
+        for i in inspect.getmembers(state):
+            print(i)
+    except Exception as e:
+        print(e)
+
+    # get all attributes of the state
+
     notify(state, "Info", f"The text is: {state.text}", True)
-    temp = state.dataframe.copy()
+    temp = state.dataframe1.copy()
     scores = analyze_text(state.text)
     temp.loc[len(temp)] = scores
-    state.dataframe = temp
+    state.dataframe1 = temp
     state.GLOBAL_QUERY = state.text
 
     # process smart bridge
@@ -103,8 +119,6 @@ def local_callback(state) -> None:
     state.dataframe = result_df
     state.refresh('dataframe')
     state.show_dialog = True
-
-
 
 
 path = ""
