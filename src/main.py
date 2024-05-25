@@ -1,4 +1,6 @@
 """ Creates a sentiment analysis App using Taipy"""
+import random
+
 import taipy.gui
 import json
 from transformers import AutoTokenizer
@@ -10,20 +12,24 @@ import numpy as np
 import pandas as pd
 from taipy.gui import Gui, notify, builder as tgb
 from constants.generic_constants import PAGE_1 as page, PAGE_RAW_DB
-from data_models.sales_model import SalesDataModel, Product, Customer, SalesTransaction
+from data_models.sales_model import (
+    SalesDataModel, Product, Customer, SalesTransaction, DATA_POINT_MAPPING_V2)
 
 from data_models.smart_connects import smart_bridge
 import chromadb
 
 from data.create_data import documents, document_map
 
+gen_text_label = ""
+gen_bar_chart_df = pd.DataFrame()
+gen_line_chart_df = pd.DataFrame()
+gen_table_df = pd.DataFrame()
 
 # Initialize ChromaDB client
 client = chromadb.PersistentClient(path="data/chroma")
 
 # Create or get the collection
 collection = client.create_collection("smart_connect_collection_v2", get_or_create=True)
-
 
 text = "Original text"
 
@@ -58,6 +64,7 @@ raw_text['metadata'] = raw_text['metadata'].apply(lambda x: json.dumps(x))
 raw_text['smart_connects'] = raw_text['smart_connects'].apply(lambda x: json.dumps(x))
 
 print(raw_text)
+
 
 def analyze_text(input_text: str) -> dict:
     """
@@ -118,7 +125,9 @@ def local_callback(state) -> None:
     result_df = r['result_df']
     state.dataframe = result_df
     state.refresh('dataframe')
-    state.show_dialog = True
+
+    # calling partial
+    show_partial(state)
 
 
 path = ""
@@ -170,6 +179,7 @@ def analyze_file(state) -> None:
         state.dataframe2 = temp
 
     state.path = None
+
 
 # dynamic page
 df = pd.read_csv('data/sample_sales_data.csv')
@@ -226,14 +236,16 @@ for each_item in config['items']:
         print(bar_chart_df)
         bar_chart = tgb.chart("{bar_chart_df}", type="bar",
                               x=each_item['x'],
-                              y=each_item['y'])
+                              y=each_item['y'],
+                              color='red')
         dynamic_components.append(bar_chart)
 
     elif each_item['type'] == 'line_chart':
         line_df = pd.DataFrame(sales_pipeline_results['data_points'][each_item['data_point']])
         line_chart = tgb.chart("{line_df}", type="line",
                                x=each_item['x'],
-                               y=each_item['y'])
+                               y=each_item['y'],
+                               color='green')
         dynamic_components.append(line_chart)
 
     elif each_item['type'] == 'table':
@@ -245,7 +257,6 @@ dynamic_page = tgb.Page()
 dynamic_page.add(*dynamic_components)
 
 
-
 def dialog_action(state, id, payload):
     with state as st:
         st.show_dialog = False
@@ -254,39 +265,110 @@ def dialog_action(state, id, payload):
 new_partial_page = tgb.Page()
 new_partial_page.add(tgb.text("## Partial Page"))
 
-
-dialog_comp = "<|{show_dialog}|dialog|page=dynamic|width=800px|on_action=dialog_action|>"
-
-
 gui = Gui()
 new_partial = gui.add_partial(new_partial_page)
 
 my_text = "111"
 
+
 def show_partial(state):
     notify(state, "Info", f"Showing partial", True)
-    import random
-    # get random text
-    _docu = random.choice(documents)
-    _new_text = _docu.get('text', "not found")
 
-    _new_page = tgb.Page()
-    with _new_page:
-        tgb.text("## New Page")
-        tgb.text(f"Text: {_new_text}")
-    new_partial.update_content(state, _new_page)
+    user_text = state.text
+
+    r = smart_bridge.run_pipeline_for_query(user_text)
+    print(r)
+    dash_config = r.get('dash_config', {})
+    _pipeline_results = r.get('sales_pipeline_results', {})
+    _dynamic_components = []
+
+    for data_point in dash_config.data_points:
+        data_point_config = DATA_POINT_MAPPING_V2.get(data_point, {})
+        print(data_point_config)
+        print(_pipeline_results)
+
+        dp_title = data_point_config.get('title', data_point.capitalize())
+        possible_charts = data_point_config.get('visual_element', [])
+        x_axis = data_point_config.get('x', 'x')
+        y_axis = data_point_config.get('y', 'y')
+
+        print(dp_title, possible_charts, x_axis, y_axis)
+        if not possible_charts:
+            continue
+        chosen_charts = random.sample(possible_charts,
+                                      min(dash_config.num_charts, len(possible_charts)))
+        for chart_type in chosen_charts:
+            color = random.choice(dash_config.color_palette)
+            if chart_type == 'label':
+                gen_text_label = f"{dp_title}: {_pipeline_results['data_points'][data_point]}"
+                state.gen_text_label = gen_text_label
+                text_component = tgb.text("## {gen_text_label}", mode='md')
+                _dynamic_components.append(text_component)
+
+            elif chart_type == 'bar_chart':
+                gen_bar_chart_df = pd.DataFrame(_pipeline_results['data_points'][data_point])
+                state.gen_bar_chart_df = gen_bar_chart_df
+                bar_chart = tgb.chart("{gen_bar_chart_df}",
+                                      type="bar",
+                                      x=x_axis, y=y_axis, color=color,
+                                      rebuild=True)
+                _dynamic_components.append(bar_chart)
+
+            elif chart_type == 'line_chart':
+                gen_line_chart_df = pd.DataFrame(_pipeline_results['data_points'][data_point])
+                state.gen_line_chart_df = gen_line_chart_df
+                line_chart = tgb.chart("{gen_line_chart_df}",
+                                       type="line",
+                                       x=x_axis, y=y_axis, color=color,
+                                       rebuild=True)
+                _dynamic_components.append(line_chart)
+
+            elif chart_type == 'table':
+                gen_table_df = pd.DataFrame(_pipeline_results['data_points'][data_point])
+                state.gen_table_df = gen_table_df
+                table = tgb.table("{gen_table_df}", page_size=50, rebuild=True)
+                _dynamic_components.append(table)
+
+    _dynamic_page = tgb.Page()
+    _dynamic_page.add(*_dynamic_components)
+    new_partial.update_content(state, _dynamic_page)
+    state.show_dialog = True
+
 
 
 # test page
 test_page = tgb.Page()
 show_part = True
 with test_page:
-    tgb.text("## Test Page")
+    tgb.text("## Natural Language Dashboard Generation", mode="md")
+
+    tgb.layout(columns="1")
+    tgb.text("**Your Query:** {text}", mode="md")
+
+    tgb.text("Enter query for smart generation:")
+    tgb.input("{text}", on_change="on_change")
+    tgb.button("Analyze", on_action="local_callback")
+
+    tgb.layout(columns="1")
+    tgb.expandable("Query Table with matches ")
+    tgb.table("{dataframe}", width="100%", number_format="%.2f", rebuild=True)
+    tgb.layout(columns="1")
+    tgb.table("{dataframe1}", width="100%", number_format="%.2f", rebuild=True)
+
+    tgb.text("last query softmax score")
+    tgb.layout(columns="1 1 1")
+    tgb.text("Positive")
+    tgb.text("{np.mean(dataframe1['Score Pos'])}", format="%.2f", raw=True)
+    tgb.text("Neutral")
+    tgb.text("{np.mean(dataframe1['Score Neu'])}", format="%.2f", raw=True)
+    tgb.text("Negative")
+    tgb.text("{np.mean(dataframe1['Score Neg'])}", format="%.2f", raw=True)
+
     tgb.text("This is a {my_text}")
     tgb.button("Show Partial", on_action="show_partial")
-
     tgb.part("{show_part}", partial="{new_partial}")
 
+dialog_comp = "<|{show_dialog}|dialog|partial={new_partial}|width=800px|on_action=dialog_action|>"
 
 pages = {
     "/": "<|toggle|theme|>\n<center>\n<|navbar|>\n</center>",

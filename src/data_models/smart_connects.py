@@ -13,7 +13,13 @@ from .sales_model import (SalesDataModel,
                           Product, Customer,
                           Feedback,
                           SalesTransaction,
-                          CustomerFeedbackModel)
+                          CustomerFeedbackModel,
+                          EmployeeDataModel,
+                          DATA_MODEL_MAPPING,
+                          DATA_POINT_MAPPING_V2
+                          )
+
+from .dashboard_generator import DashboardConfig, DashboardGenerator
 
 # Initialize ChromaDB client
 client = chromadb.PersistentClient(path="data/chroma")
@@ -21,87 +27,65 @@ client = chromadb.PersistentClient(path="data/chroma")
 # Create or get the collection
 collection = client.create_collection("smart_connect_collection_v2", get_or_create=True)
 
-# transaction data
-df = pd.read_csv('data/sample_sales_data.csv')
-print(df)
-
 
 class BaseSmartConnect(BaseModel):
     id: str
     name: str
+    dash_config: DashboardConfig
+    data_pipeline: str
+    data_model: BaseDataModel
 
     def get_data_model(self):
-        raise NotImplementedError("Each SmartConnect must implement the get_data_model method")
+        return self.data_model
 
 
 class SalesSmartConnect(BaseSmartConnect):
-    data_model: SalesDataModel
-    dash_config: Dict[str, Any]
+    data_model: Optional[SalesDataModel] = None
 
-    def get_data_model(self):
-        return self.data_model
 
 class FeedbackSmartConnect(BaseSmartConnect):
-    data_model: CustomerFeedbackModel
-    dash_config: Dict[str, Any]
-
-    def get_data_model(self):
-        return self.data_model
+    data_model: Optional[CustomerFeedbackModel] = None
 
 
-dashboard_sales = {
-    'items': [
-        {'type': 'heading', 'label': 'Total Sales', 'data_point': 'total_sales'},
-        {'type': 'bar_chart', 'title': 'Top Products by Sales', 'x': 'product_line', 'y': 'total',
-         'data_point': 'top_products'},
-        # {'type': 'line_chart', 'title': 'Top Products by Sales', 'x': 'product_line', 'y': 'total',
-        #          'data_point': 'top_products'},
-        {'type': 'table', 'title': 'Top Products by Sales', 'x': 'product_line', 'y': 'total',
-         'data_point': 'top_products'},
-        {'type': 'line_chart', 'title': 'Sales Over Time',
-         'x': 'date', 'y': 'total', 'data_point': 'sales_over_time'}
+class EmployeeSmartConnect(BaseSmartConnect):
+    data_model: Optional[EmployeeDataModel] = None
 
-    ]
-}
 
 # dynamic page
-
-sales_data = SalesDataModel(
-    products=[
-        Product(product_id=1, name="Product A", category="Category 1", price=100.0)
-    ],
-    customers=[
-        Customer(customer_id=1, name="Customer A", location="Location 1", age=30)
-    ],
-    transactions=[SalesTransaction(**row) for row in df.to_dict(orient='records')]
-)
-
-feedback_data = CustomerFeedbackModel(
-    feedbacks=[
-        Feedback(feedback_id=1, customer_id=1, rating=4.5, comments="Great service", date="2024-05-01"),
-        Feedback(feedback_id=2, customer_id=1, rating=3.5, comments="Good service", date="2024-05-02")
-    ],
-    transactions=[SalesTransaction(**row) for row in df.to_dict(orient='records')]
-)
-
-# # Sales data pipeline
-# sales_pipeline_results = sales_data.run_pipeline()
-# print(sales_pipeline_results)
-# print(sales_pipeline_results)
 
 # Example usage
 sales_smart_connect = SalesSmartConnect(
     id="sales1",
     name="Sales Data Connect",
-    data_model=sales_data,
-    dash_config=dashboard_sales
+    dash_config=DashboardConfig(
+        data_points=['total_sales', 'top_products', 'sales_over_time'],
+        num_charts=5,
+        color_palette=['blue', 'green', 'red', 'purple']
+    ),
+    data_pipeline='sales'
 )
 
 feedback_smart_connect = FeedbackSmartConnect(
     id="feedback1",
     name="Feedback Data Connect",
-    data_model=feedback_data,
-    dash_config=dashboard_sales
+    dash_config=DashboardConfig(
+        data_points=['feedback_count', 'avg_rating', 'ratings_distribution'],
+        num_charts=5,
+        color_palette=['blue', 'green', 'red', 'purple']
+    ),
+    data_pipeline='feedback'
+)
+
+employee_smart_connect = EmployeeSmartConnect(
+    id="employee1",
+    name="Employee Data Connect",
+    dash_config=DashboardConfig(
+        data_points=['total_sales', 'avg_incentive',
+                     'gender_distribution', 'age_distribution'],
+        num_charts=5,
+        color_palette=['blue', 'green', 'red', 'purple']
+    ),
+    data_pipeline='employee'
 )
 
 
@@ -151,24 +135,42 @@ class SmartBridge(BaseModel):
             for connect_id in base_document.smart_connects:
                 if connect_id in self.smart_connects:
                     smart_connect = self.smart_connects[connect_id]
-                    data_model = smart_connect.get_data_model()
+                    smart_data_pipeline = smart_connect.data_pipeline
+                    data_model = DATA_MODEL_MAPPING.get(smart_data_pipeline)
                     pipeline_results = data_model.run_pipeline()
+                    print(f"------{smart_connect.data_pipeline} ----- ")
                     print(f"Pipeline results for {smart_connect.name}: {pipeline_results}")
                     pipeline_results_list.append(pipeline_results)
                 else:
                     print(f"SmartConnect with ID {connect_id} not found")
+            #
+            # dashboard_generator = DashboardGenerator(config=smart_connect.dash_config,
+            #                                          sales_pipeline_results=pipeline_results,
+            #                                          data_point_mapping=DATA_POINT_MAPPING_V2)
+            # dynamic_page = dashboard_generator.generate_components()
 
             return {"pipeline_results": pipeline_results_list,
                     "query_result": results,
-                    "result_df": result_df}
+                    "result_df": result_df,
+                    "smart_connects": self.smart_connects,
+                    "dash_config": smart_connect.dash_config,
+                    "sales_pipeline_results": pipeline_results, }
 
 
-# Example usage of SmartBridge
+# Example usage of SmartBridge and smart connects
 smart_connects = {
     "sales1": sales_smart_connect,
     "sales2": sales_smart_connect,
-    # Add other SmartConnect objects here
-    "feedback1": feedback_smart_connect
+
+    # feedback
+    "feedback1": feedback_smart_connect,
+    "feedback2": feedback_smart_connect,
+
+    # employee
+    "employee1": employee_smart_connect,
+
+    # customer
+
 }
 
 smart_bridge = SmartBridge(smart_connects=smart_connects)

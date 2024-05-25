@@ -25,7 +25,6 @@ PAGE_1 = """
 
 ## Negative <|{np.mean(dataframe1['Score Neg'])}|text|format=%.2f|raw|>
 
-
 """
 
 

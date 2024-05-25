@@ -63,7 +63,45 @@ documents = [
         "text": "Review customer feedback from March",
         "metadata": {"type": "feedback"},
         "smart_connects": ["feedback1"]
-    }
+    },
+
+    # for employee data
+    {
+        "id": "employee_doc1",
+        "text": "How many employees are there in the company",
+        "metadata": {"type": "employee"},
+        "smart_connects": ["employee1"]
+    },
+    {
+        "id": "employee_doc2",
+        "text": "What is the average age of employees",
+        "metadata": {"type": "employee"},
+        "smart_connects": ["employee1"]
+    },
+    {
+        "id": "employee_doc3",
+        "text": "What is the average salary of employees",
+        "metadata": {"type": "employee"},
+        "smart_connects": ["employee1"]
+    },
+    {
+        "id": "employee_doc4",
+        "text": "How many employees are there in the company",
+        "metadata": {"type": "employee"},
+        "smart_connects": ["employee1"]
+    },
+    {
+        "id": "employee_doc5",
+        "text": "What is the average age of employees",
+        "metadata": {"type": "employee"},
+        "smart_connects": ["employee1"]
+    },
+    {
+        "id": "employee_doc6",
+        "text": "What is the average salary of employees",
+        "metadata": {"type": "employee"},
+        "smart_connects": ["employee1"]
+    },
 ]
 
 document_map = {doc["id"]: doc for doc in documents}
