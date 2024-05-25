@@ -245,19 +245,58 @@ dynamic_page = tgb.Page()
 dynamic_page.add(*dynamic_components)
 
 
+
 def dialog_action(state, id, payload):
     with state as st:
         st.show_dialog = False
 
 
+new_partial_page = tgb.Page()
+new_partial_page.add(tgb.text("## Partial Page"))
+
+
 dialog_comp = "<|{show_dialog}|dialog|page=dynamic|width=800px|on_action=dialog_action|>"
+
+
+gui = Gui()
+new_partial = gui.add_partial(new_partial_page)
+
+my_text = "111"
+
+def show_partial(state):
+    notify(state, "Info", f"Showing partial", True)
+    import random
+    # get random text
+    _docu = random.choice(documents)
+    _new_text = _docu.get('text', "not found")
+
+    _new_page = tgb.Page()
+    with _new_page:
+        tgb.text("## New Page")
+        tgb.text(f"Text: {_new_text}")
+    new_partial.update_content(state, _new_page)
+
+
+# test page
+test_page = tgb.Page()
+show_part = True
+with test_page:
+    tgb.text("## Test Page")
+    tgb.text("This is a {my_text}")
+    tgb.button("Show Partial", on_action="show_partial")
+
+    tgb.part("{show_part}", partial="{new_partial}")
+
 
 pages = {
     "/": "<|toggle|theme|>\n<center>\n<|navbar|>\n</center>",
     "line": page + dialog_comp,
     "text": page_file,
     "dynamic": dynamic_page,
-    "raw_data": PAGE_RAW_DB
+    "raw_data": PAGE_RAW_DB,
+    "test_page": test_page
 }
 
-Gui(pages=pages).run(title="NLDG", port=5001, debug=True, use_reloader=True)
+gui.add_pages(pages)
+
+gui.run(title="NLDG", port=5001, debug=True, use_reloader=True)
