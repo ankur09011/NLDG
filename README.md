@@ -5,10 +5,18 @@
 The idea for creating a smart module for automatic analytics dashboard generation emerged during a casual dinner conversation with my senior. We discussed the challenges of creating dynamic, insightful dashboards that could cater to various business needs without manual intervention.
 
 ## Note: This project is a work in progress. The code snippets and explanations are based on the initial design and implementation. The final version may differ significantly.
-### Goal
+
+SNAPSHOTS:
+raw dashboard
+![raw_image_dashboard.png](docs%2Fraw_image_dashboard.png)
+
+result df
+![raw_image_for_search.png](docs%2Fraw_image_for_search.png)
 
 DEMO VIDEO: 
 ![24.05.2024 23_40.gif](docs%2F24.05.2024%2023_40.gif)
+
+### Goal
 
 To develop a system that:
 - Understands user queries.
