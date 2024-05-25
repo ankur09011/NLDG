@@ -1,5 +1,5 @@
 PAGE_1 = """
-# Natural Language Dashboard Generation using **Taipy**{: .color-primary} **GUI**{: .color-primary}
+# Natural Language Dashboard Generation 
 
 <|layout|columns=1||>
 **Your Query:** <|{text}|>
