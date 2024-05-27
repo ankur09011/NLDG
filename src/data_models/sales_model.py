@@ -85,7 +85,7 @@ class SalesDataModel(BaseDataModel):
             'total_sales': total_sales,
             'top_products': top_products.to_dict(orient='records'),
             'avg_sales_per_product': avg_sales_per_product.to_dict(orient='records'),
-            'sales_over_time': sales_over_time.to_dict(orient='records')
+            'sales_over_time': sales_over_time.to_dict(orient='records'),
         }
 
 

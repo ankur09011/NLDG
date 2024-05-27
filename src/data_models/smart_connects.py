@@ -58,7 +58,8 @@ sales_smart_connect = SalesSmartConnect(
     id="sales1",
     name="Sales Data Connect",
     dash_config=DashboardConfig(
-        data_points=['total_sales', 'top_products', 'sales_over_time'],
+        data_points=['total_sales', 'top_products', 'sales_over_time',
+                     'avg_sales_per_product'],
         num_charts=5,
         color_palette=['blue', 'green', 'red', 'purple']
     ),

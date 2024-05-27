@@ -2,3 +2,4 @@ taipy
 PuLP
 pandas
 polars
+opsdroid[all]

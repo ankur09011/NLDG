@@ -102,6 +102,13 @@ documents = [
         "metadata": {"type": "employee"},
         "smart_connects": ["employee1"]
     },
+    {
+        "id": "feedback_doc4",
+        "text": "dogs and cats are anmimal",
+        "metadata": {"type": "employee"},
+        "smart_connects": ["employee1"]
+    },
+
 ]
 
 document_map = {doc["id"]: doc for doc in documents}
