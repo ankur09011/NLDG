@@ -246,3 +246,25 @@ quick scalable and flexible approach to creating automatic analytics dashboards 
 * Enhance Semantic Search: Improve query handling and matching algorithms. 
 * Optimize Pipelines: Refine data processing pipelines for better performance and accuracy. 
 * Documentation and Examples: Provide comprehensive documentation and examples to facilitate understanding and usage of the integrated semantic search and SmartConnect.
+
+
+# Next Phase:
+
+Discuss the next phase of the project, including planned features, improvements, and potential challenges.
+
+Understanding is now we need think it as a virtual assistant 
+which can answer the queries and provide the insights in the form of dashboard.
+
+Now to do that one of the framework OpsDroid we can use
+
+
+Design choices:
+user ask a question we will run the query with following pipleine
+
+1. Query Processing
+2. NLP
+3. RAG
+4. OpsDroid
+5. Voice Services
+
+Now think it like mathcking a particular skill with the query and then running the pipeline
