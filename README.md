@@ -268,3 +268,10 @@ user ask a question we will run the query with following pipleine
 5. Voice Services
 
 Now think it like mathcking a particular skill with the query and then running the pipeline
+
+
+# Update as of 23 May 2025
+
+
+
+
